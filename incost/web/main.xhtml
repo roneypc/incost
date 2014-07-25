@@ -1,0 +1,70 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+	<title>main</title>
+</h:head>
+
+<h:body>
+	<h:form id="toolbarForm">
+		<p:growl id="messages" />
+		<p:toolbar>
+		    <p:toolbarGroup align="left">
+		    	<p:commandButton type="button" value="Guardar" icon="ui-icon-disk" />
+		    	<p:separator />	
+		    </p:toolbarGroup>
+		    <p:toolbarGroup align="right">
+		    	<p:commandButton action="#{loginController.logout}" value="Logout"  ajax="false"></p:commandButton>
+		    </p:toolbarGroup>
+	    </p:toolbar>
+	</h:form>
+
+	<h:form id="tabForm">
+	    <p:tabView id="tabView" dynamic="true" cache="true">
+	        <p:tab id="tabBalance" title="Balances">
+	            <h:panelGrid columns="2" cellpadding="10">
+	            	<ui:include src="user/balance.xhtml" />
+<!-- 	                <ui:insert name="tabBalanceContent">Tabla balances insertado</ui:insert> -->
+	            </h:panelGrid>
+	        </p:tab>
+
+	        <p:tab id="tabIncome" title="Ingresos">
+	            <h:panelGrid columns="2" cellpadding="10">
+	                <h:outputText value="Tabla ingresos"/>
+	            </h:panelGrid>
+	        </p:tab>
+
+	        <p:tab id="tabBudget" title="Presupuestos">
+	            <h:panelGrid columns="2" cellpadding="10">
+	                <h:outputText value="Tabla presupuestos"/>
+	            </h:panelGrid>
+	        </p:tab>
+
+	        <p:tab id="tabExpenses" title="Gastos">
+	            <h:panelGrid columns="2" cellpadding="10">
+	                <h:outputText value="Tabla gastos"/>
+	            </h:panelGrid>
+	        </p:tab>
+
+	        <p:tab id="tabCategory" title="Categorias">
+	            <h:panelGrid columns="2" cellpadding="10">
+	                <h:outputText value="Tabla categorías"/>
+	            </h:panelGrid>
+	        </p:tab>
+
+	        <p:tab id="tabFixedData" title="Datos Fijos">
+	            <h:panelGrid columns="2" cellpadding="10">
+	                <h:outputText value="Tabla datos fijos"/>
+	            </h:panelGrid>
+	        </p:tab>
+	    </p:tabView>
+	</h:form>
+
+</h:body>
+</html>

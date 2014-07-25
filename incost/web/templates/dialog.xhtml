@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:h="http://java.sun.com/jsf/html" 
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui">
+     
+<h:head>
+    <title>Cars</title>
+    <style type="text/css">
+        .ui-widget {
+            font-size: 90%;
+        }
+    </style>
+</h:head>
+ 
+<h:body>
+	<h:form id="budgetForm">
+		<p:panelGrid id="display" columns="2" cellpadding="4" style="margin:0 auto;">
+			<h:outputText value="Presupuesto: " style="font-weight: bold" />
+               <p:selectOneMenu id="budget" value="#{expensesController.selectedBudget}" 
+               		effect="fade" converter="budgetConverter" required="true">
+                   <f:selectItem itemLabel="Seleccione presupuesto" itemValue="" />
+                   <f:selectItems value="#{expensesController.budgetList}" var="budget"
+                       itemLabel="#{budget.description}" itemValue="#{budget}" />
+  				</p:selectOneMenu>
+  				
+			<f:facet name="footer">
+				<p:commandButton value="Agregar" update=":form:dataTable, :growl"
+					oncomplete="handleSubmitRequest(xhr, status, args, 'budgetDlg','budgetForm'); " 
+					actionListener="#{expensesController.doCreateFromFixed}"/>
+			</f:facet>
+  			</p:panelGrid>
+  		</h:form>
+</h:body>
+     
+</html>

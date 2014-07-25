@@ -1,0 +1,39 @@
+<ui:composition template="/templates/layout.xhtml"
+     xmlns="http://www.w3.org/1999/xhtml"
+     xmlns:f="http://java.sun.com/jsf/core"
+     xmlns:h="http://java.sun.com/jsf/html"
+     xmlns:ui="http://java.sun.com/jsf/facelets"
+     xmlns:p="http://primefaces.org/ui"
+     xmlns:c="http://java.sun.com/jsp/jstl/core">
+
+<ui:define name="content">
+	<p:growl id="growl" showDetail="true" life="5000" />
+	<h:form id="form">
+		<p:layout style="min-height:450px;">
+		    <p:layoutUnit position="north" resizable="false" size="60" minSize="60" maxSize="60">
+		        <p:panelGrid id="selectMenu" columns="3">
+		        	<h:outputText value="#{msg['common.label.select.book']}"></h:outputText>
+		        	
+	                <p:selectOneMenu id="book" value="#{chartController.selectedBook}" 
+	                		effect="fade" converter="bookConverter" required="true">
+	                    <f:selectItem itemLabel="Seleccione libro" itemValue="" />
+	                    <f:selectItems value="#{chartController.bookList}" var="book"
+	                        itemLabel="#{book.description}" itemValue="#{book}" />
+	   				</p:selectOneMenu>
+
+					<p:commandButton value="#{msg['common.button.plot']}" id="plotButton" actionListener="#{chartController.doChart}" 
+						update=":form:graph" ajax="false" icon="ui-icon-check"/>
+		        </p:panelGrid>
+		    </p:layoutUnit>
+
+		    <p:layoutUnit position="center">
+				<p:lineChart id="graph" value="#{chartController.model}" legendPosition="e" />
+		    </p:layoutUnit>
+		</p:layout>
+	</h:form>
+</ui:define>
+
+<ui:define name="helpContent">
+</ui:define>
+
+</ui:composition>

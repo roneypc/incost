@@ -1,0 +1,301 @@
+<ui:composition template="/templates/layout.xhtml"
+     xmlns="http://www.w3.org/1999/xhtml"
+     xmlns:f="http://java.sun.com/jsf/core"
+     xmlns:h="http://java.sun.com/jsf/html"
+     xmlns:ui="http://java.sun.com/jsf/facelets"
+	 xmlns:p="http://primefaces.org/ui"
+	 xmlns:pe="http://primefaces.org/ui/extensions"
+     xmlns:c="http://java.sun.com/jsp/jstl/core">
+
+<ui:define name="content">
+	<pe:tooltip global="true" myPosition="left center" atPosition="right center"/>
+ 	<c:if test="#{balanceController.getLoadedBalance() != null}">
+	<h:form id="form">
+		<p:dataTable id="dataTable" var="budgetData" value="#{budgetController.lazyModel}" widgetVar="dataTable" 
+			styleClass="userDataTableStyle" paginator="true" rows="10" 
+			selection="#{budgetController.selectedItem}" 
+			selectionMode="single" paginatorPosition="top"  
+			paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} 
+				{NextPageLink} {LastPageLink} {RowsPerPageDropdown}" 
+			lazy="true" rowsPerPageTemplate="10,20,50"
+			emptyMessage="#{msg['budget.message.empty']}" >
+			
+			<p:ajax event="rowSelect" listener="#{viewController.onBudgetRowSelect}" 
+				update=":form:deleteButton, :form:viewButton" />
+			<p:ajax event="rowUnselect" listener="#{viewController.onBudgetRowUnSelect}" 
+				update=":form:deleteButton, :form:viewButton"/>
+
+			<f:facet name="header">
+				<h:outputText value="#{msg['budget.table.title']}"></h:outputText>
+			</f:facet>			
+	
+			<p:column headerText="#{msg['common.label.category.upper']}">#{budgetData.category.name}</p:column>
+			
+			<p:column headerText="#{msg['common.label.description.upper']}">#{budgetData.description}</p:column>
+			
+	        <p:column headerText="#{msg['common.label.amount.upper']}">
+		        <h:outputText style="float:right" value="#{budgetData.amount}">
+					<f:convertNumber type="currency" locale="es_ES" />
+		        </h:outputText>
+	        </p:column>
+	        
+			<p:column headerText="#{msg['common.label.balance.upper']}">
+		        <h:outputText style="float:right" value="#{budgetData.budgetBalance}">
+					<f:convertNumber type="currency" locale="es_ES" />
+		        </h:outputText>
+	        </p:column>
+	        
+	        <p:columnGroup type="footer">
+				<p:row>
+					<p:column colspan="2" footerText="Total:" style="text-align:right"  />
+					<p:column style="text-align: right">
+         				<f:facet name="footer">
+            				<h:outputText value ="#{budgetController.totalBudget}">
+                				<f:convertNumber type="currency" locale="es_ES" />
+            				</h:outputText>
+         				</f:facet>
+         			</p:column>
+         			<p:column style="text-align: right">
+         				<f:facet name="footer">
+            				<h:outputText value ="#{budgetController.totalBalance}">
+                				<f:convertNumber type="currency" locale="es_ES" />
+            				</h:outputText>
+         				</f:facet>
+         			</p:column>
+				</p:row>
+			</p:columnGroup>
+	        
+			<f:facet name="footer">
+				<h:outputText value="#{msg['balance.message.loaded.balance']}"></h:outputText>
+				<h:outputText value="#{balanceController.getLoadedBalanceName()}"/>
+			</f:facet>
+		</p:dataTable>
+		
+		<p:toolbar styleClass="userDataTableStyle" >
+			<p:toolbarGroup align="left">
+				<p:commandButton id="viewButton" value="#{msg['common.button.view']}" icon="ui-icon-pencil" 
+					disabled="#{viewController.disableBudgetButton}" update=":itemDetailForm:display" oncomplete="itemDialog.show()"/>
+				<p:separator />
+				<p:commandButton value="#{msg['common.button.new']}" oncomplete="newItemDialog.show()" 
+					actionListener="#{budgetController.doClearCombos}"  update=":newItemForm:display" 
+					disabled="#{viewController.disableBudgetNewButton}" icon="ui-icon-plus" />
+				<p:commandButton id="deleteButton" value="#{msg['common.button.delete']}" icon="ui-icon-trash" 
+					disabled="#{viewController.disableBudgetButton}" actionListener="#{budgetController.doDeleteItem}" update=":form:dataTable, :growl">
+					<p:confirm header="#{msg['message.delete.confirm']}" message="#{msg['message.delete.ask']}" icon="ui-icon-trash"/>
+				</p:commandButton>
+			</p:toolbarGroup>
+			
+			<p:toolbarGroup align="right">
+				<p:commandButton id="adjustButton" value="#{msg['common.button.adjust']}" icon="ui-icon-carat-2-e-w" 
+						actionListener="#{budgetController.doAdjustBudgets}" update="dataTable, :growl">
+					<p:confirm header="#{msg['message.adjust.confirm']}" message="#{msg['message.adjust.ask']}" icon="ui-icon-trash"/>
+				</p:commandButton>				
+				<p:separator />
+				<p:commandButton value="#{msg['budget.button.filter']}" oncomplete="categoryDialog.show()" icon="ui-icon-zoomin" 
+					disabled="#{viewController.disableBudgetFilterButton}" update=":form" title="Filtrar presupuestos"/>
+				<p:commandButton value="#{msg['budget.button.refresh']}" actionListener="#{budgetController.doRefreshBudgets}" icon="ui-icon-refresh" 
+					disabled="#{viewController.disableBudgetRefreshButton}" update=":form" />
+			</p:toolbarGroup>
+		</p:toolbar>
+		
+		<p:confirmDialog global="true" showEffect="fade" hideEffect="explode">
+			<p:commandButton value="#{msg['common.accept']}" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+			<p:commandButton value="#{msg['common.cancel']}" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+		</p:confirmDialog>
+	</h:form>
+
+	<!-- ***** * ***** -->
+	<!-- Diálogo EDICIÓN -->
+	<!-- ***** * ***** -->
+
+	<p:dialog widgetVar="itemDialog" resizable="false" id="itemDlg" appendTo="@(body)" modal="true"> 
+		<f:facet name="header">
+			<h:outputText value="#{msg['budget.dialog.detail.title']}"></h:outputText>
+		</f:facet>
+		<h:form id="itemDetailForm">
+			<p:panelGrid id="display" columns="2" columnClasses="dialog-left-column right-alignment, dialog-right-column"> 
+				<h:outputText value="#{msg['common.label.category']}" style="font-weight: bold" />
+                <p:selectOneMenu id="category" value="#{budgetController.selectedItem.category}" 
+                		effect="fade" converter="categoryConverter" required="true">
+                    <f:selectItem itemLabel="Seleccione categoría" itemValue="" />
+                    <f:selectItems value="#{budgetController.categoryList}" var="category"
+                        itemLabel="#{category.name}" itemValue="#{category}" />
+   				</p:selectOneMenu>
+			
+				<h:outputText value="#{msg['common.label.description']}"></h:outputText>
+				<p:inputText value="#{budgetController.selectedItem.description}" required="true" requiredMessage="Ingrese descripción!"/>
+				
+				<h:outputText value="#{msg['common.label.amount']}"></h:outputText>
+				<pe:inputNumber id="amount" value="#{budgetController.selectedItem.amount}" symbol=" €" symbolPosition="s" 
+					emptyValue="sign" minValue="1" maxValue="1000000" required="true" requiredMessage="Ingrese monto!" 
+					title="Monto presupuestado" >
+    			</pe:inputNumber>
+
+				<f:facet name="footer">
+					<p:commandButton value="#{msg['common.update']}" update=":form:dataTable, :growl" icon="ui-icon-check" 
+						oncomplete="handleSubmitRequest(xhr, status, args, 'itemDlg','itemDetailForm'); " 
+						actionListener="#{budgetController.doUpdateItem}"/>
+					<p:commandButton value="#{msg['common.cancel']}" onclick="itemDialog.hide()" icon="ui-icon-close" type="button" />
+				</f:facet>
+                </p:panelGrid> 
+		</h:form>
+	</p:dialog>
+
+	<!-- ***** * ***** -->
+	<!-- Diálogo NUEVO -->
+	<!-- ***** * ***** -->
+
+	<p:dialog widgetVar="newItemDialog" resizable="false" id="newItemDlg" appendTo="@(body)" modal="true">
+		<f:facet name="header">
+			<h:outputText value="#{msg['budget.dialog.new.title']}"></h:outputText>
+		</f:facet> 
+		<h:form id="newItemForm">
+			<p:panelGrid id="display" columns="2" columnClasses="dialog-left-column right-alignment, dialog-right-column ">
+				<h:outputText value="#{msg['common.label.category']}" style="font-weight: bold" />
+                <p:selectOneMenu id="category" value="#{budgetController.newItem.category}" 
+                		effect="fade" converter="categoryConverter" required="true">
+                    <f:selectItem itemLabel="Seleccione categoría" itemValue="" />
+                    <f:selectItems value="#{budgetController.categoryList}" var="category"
+                        itemLabel="#{category.name}" itemValue="#{category}" />
+   				</p:selectOneMenu>
+			
+				<h:outputText value="#{msg['common.label.description']}"></h:outputText>
+				<p:inputText value="#{budgetController.newItem.description}" required="true" requiredMessage="Ingrese descripción!"/>
+
+				<h:outputText value="#{msg['common.label.amount']}"></h:outputText>
+				<pe:inputNumber id="amount" value="#{budgetController.newItem.amount}" symbol=" €" symbolPosition="s" 
+					emptyValue="sign" minValue="1" maxValue="1000000" required="true" requiredMessage="Ingrese monto!" 
+					title="Monto presupuestado" >
+    			</pe:inputNumber>
+			
+				<f:facet name="footer">
+					<p:commandButton value="#{msg['common.create']}" update=":form:dataTable, :growl" icon="ui-icon-check" 
+						oncomplete="handleSubmitRequest(xhr, status, args, 'newItemDlg','newItemForm'); " 
+						actionListener="#{budgetController.doCreateItem}"/>
+					<p:commandButton value="#{msg['common.cancel']}" onclick="newItemDialog.hide()" icon="ui-icon-close" type="button" />
+				</f:facet>
+                </p:panelGrid> 
+		</h:form>
+	</p:dialog>
+	
+	<!-- ***** * ***** -->
+	<!-- Diálogo CATEGORÍA a filtrar -->
+	<!-- ***** * ***** -->
+	
+	<p:dialog widgetVar="categoryDialog" resizable="false" id="categoryDlg" appendTo="@(body)" modal="true"> 
+		<f:facet name="header">
+			<h:outputText value="#{msg['category.message.select.category']}"></h:outputText>
+		</f:facet> 
+		<h:form id="categoryForm">
+			<p:panelGrid id="display" columns="2" columnClasses="dialog-left-column right-alignment, dialog-right-column ">
+				<h:outputText value="#{msg['common.label.category']}" style="font-weight: bold" />
+                <p:selectOneMenu id="category" value="#{budgetController.selectedCategory}" 
+                		effect="fade" converter="categoryConverter" required="true">
+                    <f:selectItem itemLabel="Seleccione Categoría" itemValue="" />
+                    <f:selectItems value="#{budgetController.categoryList}" var="category"
+                        itemLabel="#{category.name}" itemValue="#{category}" />
+   				</p:selectOneMenu>
+   				
+				<f:facet name="footer">					
+					<p:commandButton value="#{msg['budget.button.filter']}" update=":form:dataTable, :growl" icon="ui-icon-check" 
+						oncomplete="categoryDialog.hide()" actionListener="#{budgetController.doFilterBudgets}" 
+						onstart=":form:dataTable.clearSelection();" />
+					<p:commandButton value="#{msg['common.cancel']}" onclick="categoryDialog.hide()" icon="ui-icon-close" type="button" />
+				</f:facet>
+   			</p:panelGrid>
+   		</h:form>
+   	</p:dialog>
+   	
+	<p:growl id="growl" showDetail="true" life="5000" />
+	
+	<script type="text/javascript">  
+	    function handleSubmitRequest(xhr, status, args, dialogName, formName) {  
+			dialog = jQuery('#'+dialogName);
+	        if(args.validationFailed) {  
+	            dialog.effect("shake", { times:3 }, 100);  
+	        } else {
+	            clearForm(formName);
+	            newItemDialog.hide(); 
+	            itemDialog.hide(); 
+	            categoryDialog.hide();
+	        }  
+	    }
+	    
+	    // Limpiar los textbox's del formulario 
+	    function clearForm(formName) {	        
+	        jQuery('#'+formName).ready(function() {
+	            $('input[type=text]').each(function() {
+	                $(this).val('');
+	            });
+	        });
+	    }
+	</script>
+ 	</c:if>
+ 	
+ 	<c:if test="#{balanceController.getLoadedBalance() == null}">
+	<h:form styleClass="loginPanelStyle">
+		<p:growl id="msgs" showDetail="true" sticky="false" />                        
+		<p:panelGrid columns="1">
+			<f:facet name="header">
+				<h:outputText value="#{msg['balance.message.no.loaded.balance']}"></h:outputText>
+			</f:facet>
+			<h:outputText value="#{msg['message.should.load.balance']}"></h:outputText>
+			<f:facet name="footer">
+			</f:facet>
+		</p:panelGrid>
+	</h:form>
+ 	</c:if>
+ 	
+</ui:define>
+
+<ui:define name="helpContent">
+	<f:attribute name="header" value="Presupuestos pre-establecidos"/>
+	<f:attribute name="size" value="450"/>
+	<c:if test="#{balanceController.getLoadedBalance() != null}">
+		<h:form id="helpForm">
+			<p:dataTable id="fixedDataTable" var="fixedDataModel" value="#{budgetController.fixedBudgetList}" 
+					scrollable="true" scrollHeight="250" selection="#{budgetController.fixedBudget}" 
+					selectionMode="single" rowKey="#{fixedDataModel.id}" 
+					emptyMessage="#{msg['fixed.budget.message.empty']}">
+
+				<p:ajax event="rowSelect" listener="#{viewController.onBudgetFixedRowSelect}" 
+					update=":helpForm:addFixedButton" />
+				<p:ajax event="rowUnselect" listener="#{viewController.onBudgetFixedRowUnSelect}" 
+					update=":helpForm:addFixedButton" />
+
+				<p:column headerText="#{msg['common.label.category.upper']}">#{fixedDataModel.category.name}</p:column>
+
+				<p:column headerText="#{msg['common.label.description.upper']}">#{fixedDataModel.description}</p:column>
+
+				<p:column headerText="#{msg['common.label.amount.upper']}">
+			        <h:outputText style="float:right" value="#{fixedDataModel.amount}">
+						<f:convertNumber type="currency" locale="es_ES" />
+			        </h:outputText>
+		        </p:column>
+
+		    </p:dataTable>
+		    
+		    <p:toolbar styleClass="userDataTableStyle" >
+				<p:toolbarGroup align="left">
+					<p:commandButton id="addFixedButton" value="#{msg['common.add']}" icon="ui-icon-carat-1-w" 
+						disabled="#{viewController.disableBudgetAddFixedButton}" update=":form:dataTable, :growl" 
+						actionListener="#{budgetController.doCreateFromFixed}"  />
+				</p:toolbarGroup>
+			</p:toolbar>
+		</h:form>
+ 	</c:if>
+ 	
+ 	<c:if test="#{balanceController.getLoadedBalance() == null}">
+		<h:form styleClass="loginPanelStyle">
+			<p:growl id="msgs" showDetail="true" sticky="false" />                        
+			<p:panelGrid columns="1" styleClass="panelGridCenter">
+				<f:facet name="header">
+					<h:outputText value="#{msg['balance.message.no.loaded.balance']}"></h:outputText>
+				</f:facet>
+			</p:panelGrid>
+		</h:form>
+ 	</c:if>
+
+</ui:define>
+
+</ui:composition>

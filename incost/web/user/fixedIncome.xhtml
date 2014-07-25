@@ -1,0 +1,145 @@
+<ui:composition template="/templates/layout.xhtml"
+     xmlns="http://www.w3.org/1999/xhtml"
+     xmlns:f="http://java.sun.com/jsf/core"
+     xmlns:h="http://java.sun.com/jsf/html"
+     xmlns:ui="http://java.sun.com/jsf/facelets"
+     xmlns:p="http://primefaces.org/ui"
+	 xmlns:pe="http://primefaces.org/ui/extensions"
+     xmlns:c="http://java.sun.com/jsp/jstl/core">
+
+<ui:define name="content">
+	<pe:tooltip global="true" myPosition="left center" atPosition="right center"/>
+	<h:form id="form">
+		<p:dataTable id="dataTable" var="fixedDataModel" value="#{fixedIncomeController.lazyModel}" 
+			styleClass="userDataTableStyle" paginator="true" rows="10" 
+			selection="#{fixedIncomeController.selectedItem}" 
+			selectionMode="single" paginatorPosition="top"  
+			paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} 
+				{NextPageLink} {LastPageLink} {RowsPerPageDropdown}" 
+			lazy="true" rowsPerPageTemplate="10,20,50"
+			emptyMessage="#{msg['fixed.incomes.message.empty']}">
+
+			<p:ajax event="rowSelect" listener="#{viewController.onFixedIncomeRowSelect}" 
+				update=":form:deleteButton, :form:viewButton" />
+			<p:ajax event="rowUnselect" listener="#{viewController.onFixedIncomeRowUnSelect}" 
+				update=":form:deleteButton, :form:viewButton"/>
+
+			<f:facet name="header">
+				<h:outputText value="#{msg['fixed.incomes.table.title']}"></h:outputText>
+			</f:facet>
+
+			<p:column headerText="#{msg['common.label.description.upper']}">#{fixedDataModel.description}</p:column>
+			
+			<p:column headerText="#{msg['common.label.amount.upper']}">
+		        <h:outputText style="float:right" value="#{fixedDataModel.amount}">
+					<f:convertNumber type="currency" locale="es_ES" />
+		        </h:outputText>
+	        </p:column>
+
+			<f:facet name="footer">
+			</f:facet>
+		</p:dataTable>
+
+		<p:toolbar styleClass="userDataTableStyle" >
+			<p:toolbarGroup align="left">
+				<p:commandButton id="viewButton" value="#{msg['common.button.view']}" icon="ui-icon-pencil" 
+					disabled="#{viewController.disableFixedIncomeButton}" update=":itemDetailForm:display" oncomplete="itemDialog.show()"/>
+				<p:separator />
+				<p:commandButton value="#{msg['common.button.new']}" oncomplete="newItemDialog.show()" icon="ui-icon-plus" />
+				<p:commandButton id="deleteButton" value="#{msg['common.button.delete']}" icon="ui-icon-trash" 
+						disabled="#{viewController.disableFixedIncomeButton}" actionListener="#{fixedIncomeController.doDeleteItem}" update="dataTable, :growl" >
+					<p:confirm header="#{msg['message.delete.confirm']}" message="#{msg['message.delete.ask']}" icon="ui-icon-trash"/>
+				</p:commandButton>
+			</p:toolbarGroup>
+		</p:toolbar>
+
+		<p:confirmDialog global="true" showEffect="fade" hideEffect="explode">
+			<p:commandButton value="#{msg['common.accept']}" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+			<p:commandButton value="#{msg['common.cancel']}" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+		</p:confirmDialog>
+	</h:form>
+
+	<!-- ***** * ***** -->
+	<!-- Diálogo EDICIÓN -->
+	<!-- ***** * ***** -->
+	
+	<p:dialog widgetVar="itemDialog" resizable="false" id="itemDlg" appendTo="@(body)" modal="true" > 
+		<f:facet name="header">
+			<h:outputText value="#{msg['fixed.incomes.dialog.detail.title']}"></h:outputText>
+		</f:facet>
+		<h:form id="itemDetailForm">
+			<p:panelGrid id="display" columns="2" columnClasses="dialog-left-column right-alignment, dialog-right-column"> 
+				<h:outputText value="#{msg['common.label.description']}"></h:outputText>
+				<h:inputText value="#{fixedIncomeController.selectedItem.description}" required="true" requiredMessage="Ingrese descripción!"/>
+
+				<h:outputText value="#{msg['common.label.amount']}"></h:outputText>
+				<pe:inputNumber id="amount" value="#{fixedIncomeController.selectedItem.amount}" symbol=" €" symbolPosition="s" 
+					emptyValue="sign" minValue="1" maxValue="1000000" required="true" requiredMessage="Ingrese monto!" 
+					title="Monto ingreso fijo" >
+    			</pe:inputNumber>				
+
+				<f:facet name="footer">
+					<p:commandButton value="#{msg['common.update']}" update=":form:dataTable, :growl" icon="ui-icon-check" 
+						oncomplete="handleSubmitRequest(xhr, status, args, 'itemDlg','itemDetailForm'); " 
+						actionListener="#{fixedIncomeController.doUpdateItem}"/>
+					<p:commandButton value="#{msg['common.cancel']}" onclick="itemDialog.hide()" icon="ui-icon-close" type="button" />
+				</f:facet>
+                </p:panelGrid> 
+		</h:form>
+	</p:dialog>
+
+	<!-- ***** * ***** -->
+	<!-- Diálogo NUEVO -->
+	<!-- ***** * ***** -->
+
+	<p:dialog widgetVar="newItemDialog" resizable="false" id="newItemDlg" appendTo="@(body)" modal="true" > 
+		<f:facet name="header">
+			<h:outputText value="#{msg['fixed.incomes.dialog.new.title']}"></h:outputText>
+		</f:facet> 
+		<h:form id="newItemForm">
+			<p:panelGrid id="display" columns="2" columnClasses="dialog-left-column right-alignment, dialog-right-column">
+				<h:outputText value="#{msg['common.label.description']}"></h:outputText>
+				<h:inputText value="#{fixedIncomeController.newItem.description}" required="true" requiredMessage="Ingrese descripción!"/>
+
+				<h:outputText value="#{msg['common.label.amount']}"></h:outputText>
+				<pe:inputNumber id="amount" value="#{fixedIncomeController.newItem.amount}" symbol=" €" symbolPosition="s" 
+					emptyValue="sign" minValue="1" maxValue="1000000" required="true" requiredMessage="Ingrese monto!" 
+					title="Monto ingreso fijo" >
+    			</pe:inputNumber>				
+
+				<f:facet name="footer">
+					<p:commandButton value="#{msg['common.create']}" update=":form:dataTable, :growl" icon="ui-icon-check" 
+						oncomplete="handleSubmitRequest(xhr, status, args, 'newItemDlg','newItemForm'); " 
+						actionListener="#{fixedIncomeController.doCreateItem}"/>
+					<p:commandButton value="#{msg['common.cancel']}" onclick="newItemDialog.hide()" icon="ui-icon-close" type="button" />
+				</f:facet>
+                </p:panelGrid> 
+		</h:form>
+	</p:dialog>
+
+	<p:growl id="growl" showDetail="true" life="5000" />
+
+	<script type="text/javascript">  
+	    function handleSubmitRequest(xhr, status, args, dialogName, formName) {  
+			dialog = jQuery('#'+dialogName);
+	        if(args.validationFailed) {  
+	            dialog.effect("shake", { times:3 }, 100);  
+	        } else {
+	            clearForm(formName);
+	            newItemDialog.hide(); 
+	            itemDialog.hide(); 
+	        }  
+	    }
+	    
+	    // Limpiar los textbox's del formulario 
+	    function clearForm(formName) {	        
+	        jQuery('#'+formName).ready(function() {
+	            $('input[type=text]').each(function() {
+	                $(this).val('');
+	            });
+	        });
+	    }
+	</script>
+
+</ui:define>
+</ui:composition>

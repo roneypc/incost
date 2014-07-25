@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en"
+     xmlns="http://www.w3.org/1999/xhtml"
+     xmlns:f="http://java.sun.com/jsf/core"
+     xmlns:h="http://java.sun.com/jsf/html"
+     xmlns:ui="http://java.sun.com/jsf/facelets"
+     xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+	<title>inCost</title>
+	<h:outputStylesheet library="css" name="default.css"  />
+</h:head>
+
+<h:body>
+    <p:layout fullPage="true">
+        <p:layoutUnit position="north" size="75" header="inCost" resizable="false" closable="false" collapsible="false">
+            <h:outputText value="" />
+        </p:layoutUnit>
+
+        <p:layoutUnit position="west" size="200" header="Menu" resizable="false" closable="false" collapsible="false" >
+                <ui:include src="../templates/tiles/LeftMenu.xhtml" />
+        </p:layoutUnit>
+
+        <p:layoutUnit position="east" size="300" header="Ayuda" resizable="true" closable="false" 
+        		collapsible="true" collapsed="true" effect="drop">
+            <ui:insert name="helpContent"></ui:insert>
+        </p:layoutUnit>
+
+        <p:layoutUnit position="center">
+			<p:layout>
+				<p:layoutUnit id="inner_center" position="center" >
+					<ui:insert name="content"></ui:insert>
+				</p:layoutUnit>
+				
+				<p:layoutUnit position="south" size="200" header="" resizable="false" closable="false" 
+						collapsible="true" collapsed="true" effect="drop">
+					<ui:insert name="southContent"></ui:insert>
+				</p:layoutUnit>
+			</p:layout>
+        </p:layoutUnit>
+    </p:layout>
+</h:body>
+</html>

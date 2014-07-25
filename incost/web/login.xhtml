@@ -1,0 +1,36 @@
+<ui:composition template="/templates/layout.xhtml"
+     xmlns="http://www.w3.org/1999/xhtml"
+     xmlns:f="http://java.sun.com/jsf/core"
+     xmlns:h="http://java.sun.com/jsf/html"
+     xmlns:ui="http://java.sun.com/jsf/facelets"
+     xmlns:p="http://primefaces.org/ui">
+
+<ui:define name="content">
+	<h:form styleClass="loginPanelStyle">
+		<p:growl id="msgs" showDetail="true" sticky="false" />
+		<p:panelGrid columns="2" columnClasses="dialog-left-column right-alignment, dialog-right-column ">
+		
+			<f:facet name="header">
+				<h:outputText value="#{msg['login.title']}"></h:outputText>
+			</f:facet>	
+
+			<h:outputText value="Login"></h:outputText>
+			<h:inputText id="login" value="#{loginController.login}" required="true" 
+					requiredMessage="Ingrese nombre de usuario!">
+				<f:validateLength minimum="1" />
+			</h:inputText>
+			
+			<h:outputText value="Password"></h:outputText>
+			<h:inputSecret id="password" value="#{loginController.password}" required="true" 
+					requiredMessage="Ingrese password!">
+				<f:validateLength minimum="1" />  
+			</h:inputSecret>
+			
+			<f:facet name="footer">
+				<p:commandButton value="#{msg['login.button.login']}" update="msgs" action="#{loginController.loginApp}" 
+					type="submit" icon="ui-icon-check" style="margin:0"></p:commandButton>
+			</f:facet>
+		</p:panelGrid>
+	</h:form>
+</ui:define>
+</ui:composition>

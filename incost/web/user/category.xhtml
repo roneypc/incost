@@ -1,0 +1,158 @@
+<ui:composition template="/templates/layout.xhtml"
+     xmlns="http://www.w3.org/1999/xhtml"
+     xmlns:f="http://java.sun.com/jsf/core"
+     xmlns:h="http://java.sun.com/jsf/html"
+     xmlns:ui="http://java.sun.com/jsf/facelets"
+     xmlns:p="http://primefaces.org/ui"
+     xmlns:c="http://java.sun.com/jsp/jstl/core">
+
+<ui:define name="content">
+	<h:form id="form">
+		<p:dataTable id="dataTable" var="categoryData" value="#{categoryController.lazyModel}" 
+			styleClass="userDataTableStyle" paginator="true" rows="10" 
+			selection="#{categoryController.selectedItem}" 
+			selectionMode="single" paginatorPosition="top"  
+			paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} 
+				{NextPageLink} {LastPageLink} {RowsPerPageDropdown}" 
+			lazy="true" rowsPerPageTemplate="10,20,50"
+			emptyMessage="#{msg['category.message.empty']}">
+			
+			<p:ajax event="rowSelect" listener="#{viewController.onCategoryRowSelect}" 
+				update=":form:deleteButton, :form:viewButton" />
+			<p:ajax event="rowUnselect" listener="#{viewController.onCategoryRowUnSelect}" 
+				update=":form:deleteButton, :form:viewButton" />
+
+			<f:facet name="header">
+				<h:outputText value="#{msg['category.table.title']}"></h:outputText>
+			</f:facet>
+
+			<p:column headerText="#{msg['category.data.name']}">#{categoryData.name}</p:column>
+
+			<p:column headerText="#{msg['category.data.description']}">#{categoryData.description}</p:column>
+			
+			<p:column headerText="#{msg['category.data.type']}">
+		        <h:outputText value="#{msg[categoryData.categoryType.name]}" />
+	        </p:column>
+			
+			<f:facet name="footer">
+			</f:facet>
+		</p:dataTable>
+
+		<p:toolbar styleClass="userDataTableStyle" >
+			<p:toolbarGroup align="left">
+				<p:commandButton id="viewButton" value="#{msg['common.button.view']}" icon="ui-icon-pencil" 
+					disabled="#{viewController.disableCategoryButton}" update=":itemDetailForm:display" oncomplete="itemDialog.show()"/>
+				<p:separator />
+				<p:commandButton value="#{msg['common.button.new']}" oncomplete="newItemDialog.show()" 
+				actionListener="#{categoryController.doClearCombos}"  update=":newItemForm:display" icon="ui-icon-plus" />
+				<p:commandButton value="#{msg['common.button.delete']}" id="deleteButton" actionListener="#{categoryController.doDeleteItem}" 
+						disabled="#{viewController.disableCategoryButton}" update="dataTable, :growl" icon="ui-icon-trash" >
+					<p:confirm header="#{msg['message.delete.confirm']}" message="#{msg['message.delete.ask']}" icon="ui-icon-trash"/>
+				</p:commandButton>
+			</p:toolbarGroup>
+		</p:toolbar>
+		
+		<p:confirmDialog global="true" showEffect="fade" hideEffect="explode">
+			<p:commandButton value="#{msg['common.accept']}" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+			<p:commandButton value="#{msg['common.cancel']}" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+		</p:confirmDialog>
+	</h:form>
+
+	<!-- ***** * ***** -->
+	<!-- Diálogo EDICIÓN -->
+	<!-- ***** * ***** -->
+	
+	<p:dialog widgetVar="itemDialog" resizable="false" id="itemDlg" appendTo="@(body)" modal="true"> 
+		<f:facet name="header">
+			<h:outputText value="#{msg['category.dialog.detail.title']}"></h:outputText>
+		</f:facet>
+		<h:form id="itemDetailForm">
+			<p:panelGrid id="display" columns="2" columnClasses="dialog-left-column right-alignment, dialog-right-column ">  
+				<h:outputText value="#{msg['common.label.name']}"></h:outputText>
+				<p:inputText value="#{categoryController.selectedItem.name}" required="true" 
+					style="text-transform: uppercase" requiredMessage="Ingrese nombre!"/>
+
+				<h:outputText value="#{msg['common.label.description']}"></h:outputText>
+				<p:inputText value="#{categoryController.selectedItem.description}" required="true" 
+					requiredMessage="Ingrese descripción!"/>
+
+            	<h:outputText value="#{msg['common.label.type']}" style="font-weight: bold" />
+                <p:selectOneMenu id="categoryType" value="#{categoryController.selectedItem.categoryType}" 
+                		effect="fade" required="true" converter="cTypeConverter">
+                    <f:selectItem itemLabel="Seleccione tipo" itemValue="" />
+                    <f:selectItems value="#{categoryController.categoryTypes}" var="categoryType"
+                        itemLabel="#{msg[categoryType.name]}" itemValue="#{categoryType}" />
+   				</p:selectOneMenu>
+
+				<f:facet name="footer">
+					<p:commandButton value="#{msg['common.update']}" update=":form:dataTable, :growl" icon="ui-icon-check" 
+						oncomplete="handleSubmitRequest(xhr, status, args, 'itemDlg','itemDetailForm'); " 
+						actionListener="#{categoryController.doUpdateItem}"/>
+					<p:commandButton value="#{msg['common.cancel']}" onclick="itemDialog.hide()" icon="ui-icon-close" type="button" />
+				</f:facet>
+			</p:panelGrid>
+		</h:form>
+	</p:dialog>
+
+	<!-- ***** * ***** -->
+	<!-- Diálogo NUEVO -->
+	<!-- ***** * ***** -->
+	
+	<p:dialog widgetVar="newItemDialog" resizable="false" id="newItemDlg" appendTo="@(body)" modal="true"> 
+		<f:facet name="header">
+			<h:outputText value="#{msg['category.dialog.new.title']}"></h:outputText>
+		</f:facet>
+		<h:form id="newItemForm">
+			<p:panelGrid id="display" columns="2" columnClasses="dialog-left-column right-alignment, dialog-right-column ">
+				<h:outputText value="#{msg['common.label.name']}"></h:outputText>
+				<p:inputText value="#{categoryController.newItem.name}" required="true" 
+					style="text-transform: uppercase" requiredMessage="Ingrese nombre!"/>
+
+				<h:outputText value="#{msg['common.label.description']}"></h:outputText>
+				<p:inputText value="#{categoryController.newItem.description}" required="true" 
+					requiredMessage="Ingrese descripción!"/>
+
+            	<h:outputText value="#{msg['common.label.type']}" />
+                <p:selectOneMenu id="categoryType" value="#{categoryController.newItem.categoryType}" 
+                		effect="fade" required="true" converter="cTypeConverter">
+                    <f:selectItem itemLabel="Seleccione tipo" itemValue="" />
+                    <f:selectItems value="#{categoryController.categoryTypes}" var="categoryType"
+                        itemLabel="#{msg[categoryType.name]}" itemValue="#{categoryType}" />
+   				</p:selectOneMenu>
+
+				<f:facet name="footer">
+					<p:commandButton value="#{msg['common.create']}" update=":form:dataTable, :growl" icon="ui-icon-check" 
+						oncomplete="handleSubmitRequest(xhr, status, args, 'newItemDlg','newItemForm'); " 
+						actionListener="#{categoryController.doCreateItem}"/>
+					<p:commandButton value="#{msg['common.cancel']}" onclick="newItemDialog.hide()" icon="ui-icon-close" type="button" />
+				</f:facet>
+                </p:panelGrid> 
+		</h:form>
+	</p:dialog>
+
+	<p:growl id="growl" showDetail="true" life="5000" />
+
+	<script type="text/javascript">  
+	    function handleSubmitRequest(xhr, status, args, dialogName, formName) {  
+			dialog = jQuery('#'+dialogName);
+	        if(args.validationFailed) {  
+	            dialog.effect("shake", { times:3 }, 100);  
+	        } else {
+	            clearForm(formName);
+	            newItemDialog.hide(); 
+	            itemDialog.hide(); 
+	        }  
+	    }
+	    
+	    // Limpiar los textbox's del formulario 
+	    function clearForm(formName) {	        
+	        jQuery('#'+formName).ready(function() {
+	            $('input[type=text]').each(function() {
+	                $(this).val('');
+	            });
+	        });
+	    }	    
+	</script>
+
+</ui:define>
+</ui:composition>

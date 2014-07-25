@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://java.sun.com/jsp/jstl/core">
+<h:head>
+    <title>Title</title>
+</h:head>
+<h:body>
+	<h:form>
+		<p:accordionPanel cache="false" dynamic="true" rendered="true" activeIndex="#{viewController.activeIndexes}">
+	
+		<p:ajax event="tabChange" listener="#{viewController.onTabChange}"/>
+		
+		<p:tab title="Principal">
+			<p:menu style="width:100%" >
+				<c:if test="#{request.getUserPrincipal() != null}">
+					<p:menuitem value="Logout" action="#{loginController.logout}" icon="ui-icon-power"/>
+				</c:if>
+				<c:if test="#{request.getUserPrincipal() == null}">
+					<p:menuitem value="Login" action="/Login.xhtml?faces-redirect=true" icon="ui-icon-power" />
+				</c:if>
+			</p:menu>
+		</p:tab>
+        <p:tab title="Balances">
+            <p:menu style="width:100%" >
+				<c:if test="#{request.isUserInRole('Administrator')}">
+<!--				<p:menuitem value="Home" action="/admin/AdminHome.xhtml?faces-redirect=true" ajax="false" icon="ui-icon-home" />  -->
+				</c:if>
+				<c:if test="#{request.getUserPrincipal() != null}">
+                   <p:menuitem value="Balance" action="#{navigationController.doNav}">
+					<f:param name="targetPage" value="/user/balance.xhtml" />
+					</p:menuitem>
+					<p:menuitem value="Ingresos" action="#{navigationController.doNav}">
+						<f:param name="targetPage" value="/user/income.xhtml" />
+					</p:menuitem>
+					<p:menuitem value="Presupuestos" action="#{navigationController.doNav}">
+						<f:param name="targetPage" value="/user/budget.xhtml" />
+					</p:menuitem>
+					<p:menuitem value="Gastos" action="#{navigationController.doNav}">
+						<f:param name="targetPage" value="/user/expenses.xhtml" />
+					</p:menuitem>
+					<p:separator />
+					<p:menuitem value="Efectivo Caja" action="#{navigationController.doNav}">
+						<f:param name="targetPage" value="/user/cash.xhtml" />
+					</p:menuitem>
+					<p:separator />
+					<p:menuitem value="Categorías" action="#{navigationController.doNav}">
+						<f:param name="targetPage" value="/user/category.xhtml" />
+					</p:menuitem>
+				</c:if>
+            </p:menu>
+        </p:tab>
+        <p:tab title="Fijos">
+        	<p:menu style="width:100%" >
+	        	<c:if test="#{request.getUserPrincipal() != null}">
+					<p:menuitem value="Ingresos fijos" action="#{navigationController.doNav}">
+						<f:param name="targetPage" value="/user/fixedIncome.xhtml" />
+					</p:menuitem>
+					<p:menuitem value="Presupuestos fijos" action="#{navigationController.doNav}">
+						<f:param name="targetPage" value="/user/fixedBudget.xhtml" />
+					</p:menuitem>
+					<p:menuitem value="Gastos fijos" action="#{navigationController.doNav}">
+						<f:param name="targetPage" value="/user/fixedExpenses.xhtml" />
+					</p:menuitem>
+					<p:menuitem value="Efectivo fijo" action="#{navigationController.doNav}">
+						<f:param name="targetPage" value="/user/fixedCash.xhtml" />
+					</p:menuitem>
+	        	</c:if>
+        	</p:menu>
+        </p:tab>
+        <p:tab title="Reportes">
+			<p:menu style="width:100%" >
+				<c:if test="#{request.getUserPrincipal() != null}">
+					<p:menuitem value="Libros" action="#{navigationController.doNav}">
+						<f:param name="targetPage" value="/user/book.xhtml" />
+					</p:menuitem>
+					<p:menuitem value="Gráficas" action="#{navigationController.doNav}">
+						<f:param name="targetPage" value="/user/bookReport.xhtml" />
+					</p:menuitem>
+				</c:if>
+			</p:menu>
+        </p:tab>
+    </p:accordionPanel>
+        </h:form>
+    </h:body>
+</html>

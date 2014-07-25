@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE glassfish-web-app PUBLIC "-//GlassFish.org//DTD GlassFish Application Server 3.1 Servlet 3.0//EN" "http://glassfish.org/dtds/glassfish-web-app_3_0-1.dtd">
+<glassfish-web-app>
+    <context-root>/incost</context-root>
+<security-role-mapping>
+    <role-name>Administrator</role-name>
+    <group-name>Administrator</group-name>
+  </security-role-mapping>
+  <security-role-mapping>
+    <role-name>User</role-name>
+    <group-name>User</group-name>
+  </security-role-mapping>
+  <class-loader delegate="true"/>
+  <jsp-config>
+    <property name="keepgenerated" value="true">
+      <description>Mantiene una copia de la clase servlet generada.</description>
+    </property>
+  </jsp-config>
+  <parameter-encoding default-charset="UTF-8"/>
+</glassfish-web-app>
